@@ -4,9 +4,11 @@ enum Lex[Root, Marker, Conj]:
   case Conj(conj: Conj, lex: Lex[Root, Marker, Conj])
   case Phrase(marker: Marker, word: Word[Root, Marker, Conj], lex: Lex[Root, Marker, Conj])
 
-trait Parsable[A]:
-  val values: Array[String]
+trait Show[A]:
   def show(a: A): String
+
+trait Parsable[A] extends Show[A]:
+  val values: Array[String]
   def unshow(a: String): A
 
 enum Root:
@@ -16,7 +18,7 @@ enum Conj:
   case And, Or, Then
 
 enum Marker:
-  case Noun, Verb, Adjective
+  case Noun, Verb, Ad
 
 object RootV extends Parsable[Root]:
   val values: Array[String] = Array(Root.Mi, Root.You, Root.Love, Root.Big, Root.Not).map(show)
@@ -53,19 +55,19 @@ object ConjV extends Parsable[Conj]:
       case Conj.Then => "then"
 
 object MarkerV extends Parsable[Marker]:
-  val values = Array(Marker.Noun, Marker.Verb, Marker.Adjective).map(show)
+  val values = Array(Marker.Noun, Marker.Verb, Marker.Ad).map(show)
 
   def unshow(a: String): Marker =
     a match
       case "a" => Marker.Noun 
       case "i" => Marker.Verb 
-      case "e" => Marker.Adjective
+      case "e" => Marker.Ad
 
   def show(a: Marker): String =
     a match
       case Marker.Noun => "a"
       case Marker.Verb => "i"
-      case Marker.Adjective => "e"
+      case Marker.Ad => "e"
 
 def parse(
   input: List[String],
@@ -75,9 +77,9 @@ def parse(
       Lex.Phrase(MarkerV.unshow(mark), Lex.Word(RootV.unshow(word)), parse(tail))
     case mark :: tail if ConjV.values.contains(mark) =>
       Lex.Conj(ConjV.unshow(mark), parse(tail))
-    case word :: tail => parse("a" :: word :: tail)
+    case word :: tail => parse("e" :: word :: tail)
     case Nil => Lex.End()
 
 @main def main(): Unit =
-  println(parse("mi i love and i love a you".split(" ").toList))
+  println(parse("a mi mi i love love and i love a you you".split(" ").toList))
 end main
