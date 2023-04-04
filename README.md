@@ -1,8 +1,7 @@
-## sbt project compiled with Scala 3
+# Constructed auxiliary language inspired by programming languages
 
-### Usage
-
-This is a normal sbt project. You can compile code with `sbt compile`, run it with `sbt run`, and `sbt console` will start a Scala 3 REPL.
-
-For more information on the sbt-dotty plugin, see the
-[scala3-example-project](https://github.com/scala/scala3-example-project/blob/main/README.md).
+## Goals:
+- To be clear
+- To be parsable
+- Te be reusable
+- To be practical
