@@ -82,17 +82,35 @@ object MarkerV extends Parsable[Marker]:
       case Marker.Verb => "i"
       case Marker.Ad => "e"
 
-def parse(
-  input: List[String],
-): Lex[Root, Marker, Conj] =
-  input match
-    case mark :: word :: tail if MarkerV.isCorrect(mark) =>
-      Lex.Phrase(MarkerV.unshow(mark), Lex.Word(RootV.unshow(word)), parse(tail))
-    case mark :: tail if ConjV.isCorrect(mark) =>
-      Lex.Conj(ConjV.unshow(mark), parse(tail))
-    case word :: tail => parse("e" :: word :: tail)
-    case Nil => Lex.End()
+object LexV extends Parsable[Lex[Root, Marker, Conj]]:
+  def isCorrect(a: String): Boolean = unshow(a) != Lex.End()
+
+  def unshow(input: String): Lex[Root, Marker, Conj] =
+    input.split(" ").toList match
+      case mark :: tail if MarkerV.isCorrect(mark) => iter(mark :: tail)
+      case tail => iter(MarkerV.show(Marker.Noun) :: tail)
+
+  private def iter(input: List[String]): Lex[Root, Marker, Conj] =
+    input match
+      case mark :: word :: tail if MarkerV.isCorrect(mark) =>
+        Lex.Phrase(MarkerV.unshow(mark), Lex.Word(RootV.unshow(word)), iter(tail))
+      case mark :: tail if ConjV.isCorrect(mark) =>
+        Lex.Conj(ConjV.unshow(mark), iter(tail))
+      case word :: tail => iter(MarkerV.show(Marker.Ad) :: word :: tail)
+      case Nil => Lex.End()
+
+  def show(lex: Lex[Root, Marker, Conj]): String =
+    lex match
+      case Lex.End() => ""
+      case Lex.Word(root) => RootV.show(root)
+      case Lex.Conj(conj, lex) => s"${ConjV.show(conj)} ${show(lex)}"
+      case Lex.Phrase(marker, word, lex) => s"${MarkerV.show(marker)} ${show(word)} ${show(lex)}"
 
 @main def main(): Unit =
-  println(parse("a mi+you mi i love big a you".split(" ").toList))
+  val input = "mi+you mi i love big a you"
+  val parsed = LexV.unshow(input)
+  val showd = LexV.show(parsed)
+
+  println(input)
+  println(showd)
 end main
